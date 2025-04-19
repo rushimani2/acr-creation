@@ -9,7 +9,7 @@ on:
 
 jobs:
   terraform:
-    runs-on: self-hosted  # Or use 'ubuntu-latest' if you're not on a self-hosted runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
