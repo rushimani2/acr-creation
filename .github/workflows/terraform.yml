@@ -27,6 +27,10 @@ jobs:
         ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
         ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
+    - name: Import Existing Resource Group
+      run: |
+        terraform import azurerm_resource_group.acr_rg /subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/github-workflow
+
     - name: Terraform Plan
       run: terraform plan -var-file="terraform.tfvars"
       env:
