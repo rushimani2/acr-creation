@@ -1,2 +1,2 @@
-resource_group_name = "gh-actions-rg"
+resource_group_name = "github-workflow"
 acr_name            = "mygithubacr123"  # Must be globally unique
