@@ -3,13 +3,19 @@ name: Terraform Apply - ACR Provisioning
 on:
   push:
     branches:
-      - "**"
-  workflow_dispatch:
+      - '**'           # Triggers on push to any branch
+  workflow_dispatch:     # Allows manual trigger
 
 jobs:
   terraform:
     name: 'Terraform Init, Plan, Apply'
     runs-on: ubuntu-latest
+
+    env:  # 👇 Set Azure credentials for all steps in this job
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
     steps:
     - name: Checkout repository
@@ -28,8 +34,3 @@ jobs:
 
     - name: Terraform Apply
       run: terraform apply -auto-approve -var-file="terraform.tfvars"
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
