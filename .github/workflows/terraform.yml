@@ -3,19 +3,12 @@ name: Terraform Apply - ACR Provisioning
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main  # or specify your branch name here
 
 jobs:
   terraform:
-    name: Terraform Init, Import, Plan, Apply
+    name: 'Terraform Init, Plan, Apply'
     runs-on: ubuntu-latest
-
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
     steps:
     - name: Checkout repository
@@ -28,13 +21,37 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-
-    - name: Import existing Resource Group
-      run: |
-        terraform import azurerm_resource_group.acr_rg "/subscriptions/${{ secrets.ARM_SUBSCRIPTION_ID }}/resourceGroups/github-workflow" || echo "Already imported or not needed"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
     - name: Terraform Plan
       run: terraform plan -var-file="terraform.tfvars"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve -var-file="terraform.tfvars"
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+    - name: Capture ACR Credentials Output
+      id: outputs
+      run: |
+        echo "ACR_USERNAME=$(terraform output -raw acr_username)" >> $GITHUB_ENV
+        echo "ACR_PASSWORD=$(terraform output -raw acr_password)" >> $GITHUB_ENV
+        echo "ACR_LOGIN_SERVER=$(terraform output -raw acr_login_server)" >> $GITHUB_ENV
+
+    - name: Use ACR Credentials
+      run: |
+        echo "Using ACR credentials securely"
+        # Example of using ACR login:
+        echo ${{ env.ACR_PASSWORD }} | docker login ${{ env.ACR_LOGIN_SERVER }} --username ${{ env.ACR_USERNAME }} --password-stdin
